@@ -5,6 +5,7 @@ const { ValidationError, AppError } = require("../utils/error/index");
 class BookingRepository {
     
     async create(data) {
+        console.log("booking is", data);
         try {
             const booking = await Booking.create(data);
             return booking;
@@ -30,7 +31,6 @@ class BookingRepository {
             // });
             // return true;
             const booking = await Booking.findByPk(bookingId);
-            console.log(booking);
             if(data.status) {
                 booking.status = data.status;
             }
