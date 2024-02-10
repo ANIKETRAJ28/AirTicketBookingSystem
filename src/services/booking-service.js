@@ -18,6 +18,7 @@ class BookingService {
                 throw new ServiceError("Something went wrong in the booking process", "Insufficient seats available");
             }
             const FlightPrice = flightData.price;
+            if(data.noOfSeats == undefined) data.noOfSeats = 1;
             const totalCost = FlightPrice * data.noOfSeats;
             const bookingPayload = {...data, totalCost};
             const booking = await this.bookingRepository.create(bookingPayload);
