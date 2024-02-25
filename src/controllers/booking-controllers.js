@@ -33,7 +33,7 @@ const create = async (req, res) => {
             err: {}
         });
     } catch (error) {
-        res.status(error.statusCode).json({
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
             message: error.message,
             data: {},
             success: false,

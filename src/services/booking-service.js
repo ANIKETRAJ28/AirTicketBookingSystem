@@ -27,7 +27,6 @@ class BookingService {
             const finalBooking = await this.bookingRepository.update(booking.id, {status: "Booked"})
             return finalBooking;
         } catch (error) {
-            console.log("error is",error);
             if(error.name == "RepositoryError" || error.name == "ValidationError") {
                 throw error;
             }
