@@ -2,6 +2,8 @@ const { BookingRepository } = require("../repository/index");
 const axios = require("axios");
 const { FLIGHT_SERVICE_PATH } = require("../config/serverConfig");
 const { ServiceError } = require("../utils/error");
+const { createChannel, publishMessage } = require("../utils/messageQueues");
+const { REMINDER_BINDING_KEY } = require("../config/serverConfig");
 
 class BookingService {
     constructor() {
@@ -24,7 +26,8 @@ class BookingService {
             const booking = await this.bookingRepository.create(bookingPayload);
             const updateFlightRequestUrl = `${FLIGHT_SERVICE_PATH}/api/v1/flights/${booking.flightId}`;
             await axios.patch(updateFlightRequestUrl, {totalSeats: flightData.totalSeats - booking.noOfSeats});
-            const finalBooking = await this.bookingRepository.update(booking.id, {status: "Booked"})
+            const finalBooking = await this.bookingRepository.update(booking.id, {status: "Booked"});
+            this.sendMessageQueue(flightData);
             return finalBooking;
         } catch (error) {
             if(error.name == "RepositoryError" || error.name == "ValidationError") {
@@ -32,6 +35,20 @@ class BookingService {
             }
             throw new ServiceError();
         }
+    }
+
+    async sendMessageQueue(data) {
+        const channel = await createChannel();
+        const payload = {
+            data: {
+                subject: "Flight Notification",
+                content: `Your flight with flight id ${data.id} named ${data.flightNumber} will arrive at ${data.arrivalTime}`,
+                recepientEmail: "aniketraj28042003@gmail.com",
+                notificationTime: " 2024-02-14 05:50:20"
+            },
+            service: "SEND_TICKET"
+        };
+        publishMessage(channel, REMINDER_BINDING_KEY, JSON.stringify(payload));
     }
 }
 
